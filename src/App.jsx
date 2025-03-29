@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "/src/app.css";
+import "./app.css";
 
 const Tictactoe = () => {
   const [b, setb] = useState(Array(9).fill(null));
