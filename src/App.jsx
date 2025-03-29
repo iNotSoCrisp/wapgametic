@@ -1,101 +1,99 @@
-import { useState } from "react";
-import "./app.css";
+import React, { useState } from "react";
 
-const Tictactoe = () => {
-  const [b, setb] = useState(Array(9).fill(null));
-  const [xturn, setxturn] = useState(true);
+const App = () => {
+  const styles = {
+    container: {
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      height: "100vh",
+      backgroundColor: "black",
+      color: "white",
+      fontFamily: "Arial, sans-serif",
+    },
+    board: {
+      display: "grid",
+      gridTemplateColumns: "repeat(3, 100px)",
+      gridTemplateRows: "repeat(3, 100px)",
+      gap: "5px",
+      marginTop: "20px",
+    },
+    cell: {
+      width: "100px",
+      height: "100px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: "32px",
+      fontWeight: "bold",
+      backgroundColor: "#222",
+      border: "2px solid white",
+      cursor: "pointer",
+    },
+    status: {
+      fontSize: "24px",
+      marginBottom: "10px",
+    },
+    button: {
+      marginTop: "15px",
+      padding: "10px 20px",
+      fontSize: "16px",
+      backgroundColor: "red",
+      color: "white",
+      border: "none",
+      cursor: "pointer",
+    },
+  };
 
-  const checkwinner = (b) => {
-    const w = [
+  const [board, setBoard] = useState(Array(9).fill(null));
+  const [isX, setIsX] = useState(true);
+
+  const checkWinner = (b) => {
+    const winPatterns = [
       [0, 1, 2], [3, 4, 5], [6, 7, 8],
       [0, 3, 6], [1, 4, 7], [2, 5, 8],
       [0, 4, 8], [2, 4, 6]
     ];
-
-    for (let v of w) {
-      const [a, c, d] = v;
-      if (b[a] && b[a] === b[c] && b[a] === b[d]) {
-        return b[a];
-      }
+    for (let pattern of winPatterns) {
+      const [a, b, c] = pattern;
+      if (b[a] && b[a] === b[b] && b[a] === b[c]) return b[a];
     }
     return null;
   };
 
-  const smartmove = (b) => {
-    const empty = b.map((v, i) => (v === null ? i : null)).filter((v) => v !== null);
-
-    for (let i of empty) {
-      let t = [...b];
-      t[i] = "O";
-      if (checkwinner(t) === "O") return i;
-    }
-
-    for (let i of empty) {
-      let t = [...b];
-      t[i] = "X";
-      if (checkwinner(t) === "X") return i;
-    }
-
-    if (empty.includes(4)) return 4;
-
-    const corners = [0, 2, 6, 8].filter(i => empty.includes(i));
-    if (corners.length) return corners[Math.floor(Math.random() * corners.length)];
-
-    return empty[Math.floor(Math.random() * empty.length)];
+  const handleClick = (i) => {
+    if (board[i] || checkWinner(board)) return;
+    const newBoard = board.slice();
+    newBoard[i] = isX ? "X" : "O";
+    setBoard(newBoard);
+    setIsX(!isX);
   };
 
-  const genmove = (b) => {
-    const r = Math.random() * 2;
-    const empty = b.map((v, i) => (v === null ? i : null)).filter((v) => v !== null);
-
-    if (r > 0.8) {
-      return smartmove(b);
-    } else {
-      return empty[Math.floor(Math.random() * empty.length)];
-    }
+  const resetGame = () => {
+    setBoard(Array(9).fill(null));
+    setIsX(true);
   };
 
-  const click = (i) => {
-    if (b[i] || checkwinner(b) || !xturn) return;
-
-    const newb = [...b];
-    newb[i] = "X";
-    setb(newb);
-
-    if (checkwinner(newb)) return;
-
-    const move = genmove(newb);
-    if (move !== null) {
-      newb[move] = "O";
-      setb(newb);
-    }
-
-    setxturn(true);
-  };
-
-  const reset = () => {
-    setb(Array(9).fill(null));
-    setxturn(true);
-  };
+  const winner = checkWinner(board);
+  const isDraw = board.every(cell => cell) && !winner;
 
   return (
-    <div className="tictactoe">
-      <h1 className="title">Tic-Tac-Toe</h1>
-      <div className="board">
-        {b.map((v, i) => (
-          <button key={i} className="cell" onClick={() => click(i)}>
-            {v}
-          </button>
+    <div style={styles.container}>
+      <h1>Tic-Tac-Toe</h1>
+      <div style={styles.status}>
+        {winner ? `Winner: ${winner}` : isDraw ? "It's a Draw!" : `Next: ${isX ? "X" : "O"}`}
+      </div>
+      <div style={styles.board}>
+        {board.map((cell, i) => (
+          <div key={i} style={styles.cell} onClick={() => handleClick(i)}>
+            {cell}
+          </div>
         ))}
       </div>
-      {checkwinner(b) ? (
-        <p className="status">Winner: {checkwinner(b)}</p>
-      ) : (
-        <p className="status">Next: {xturn ? "X" : "O (AI)"}</p>
-      )}
-      <button className="reset" onClick={reset}>Reset</button>
+      <button style={styles.button} onClick={resetGame}>Reset</button>
     </div>
   );
 };
 
-export default Tictactoe;
+export default App;
